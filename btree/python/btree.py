@@ -180,11 +180,10 @@ class Node(Generic[T]):
         else:
             return self.parent.childs[pos+1]
 
-    def reconst_for_delete(self, v: T, call_from_delete: bool = True):
+    def reconst_for_delete(self, v: T):
         if len(self.vals) > 1:
             raise Exception()
         else:
-            pos,_ = self.pos_for_add(v)
             
             l_s = self.left_sibling()
             r_s = self.right_sibling()
@@ -246,7 +245,7 @@ class Node(Generic[T]):
                         self.childs = l_s.childs + self.childs
                 else:
                     if self.parent.parent:
-                        self.parent.reconst_for_delete(v, False)
+                        self.parent.reconst_for_delete(v)
                         
                     else:
                         # case root
