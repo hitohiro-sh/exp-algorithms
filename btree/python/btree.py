@@ -79,9 +79,7 @@ class Node(Generic[T]):
         if not pos:
             pos,_ = self.pos_for_add(v)
         
-
-        if len(self.vals) < 3:
-            
+        if len(self.vals) < 3:    
             self.vals.insert(pos, v)
             root = None
         else:
@@ -103,11 +101,10 @@ class Node(Generic[T]):
                 if not self.leaf:
                     childs = self.childs
                     l_node.childs = childs[:2]
-                    for c in l_node.childs:
-                        c.parent = l_node
+                    Node.set_parent(l_node, l_node.childs)
                     r_node.childs = childs[2:]
-                    for c in r_node.childs:
-                        c.parent = r_node
+                    Node.set_parent(r_node, r_node.childs)
+
                 if self.parent:
                     parent = self.parent
                     l_node.parent = parent
@@ -135,11 +132,10 @@ class Node(Generic[T]):
                 if not self.leaf:
                     childs = self.childs
                     l_node.childs = childs[:2]
-                    for c in l_node.childs:
-                        c.parent = l_node
+                    Node.set_parent(l_node, l_node.childs)
                     r_node.childs = childs[2:]
-                    for c in r_node.childs:
-                        c.parent = r_node
+                    Node.set_parent(r_node, r_node.childs)
+                    
                 if self.parent:
                     parent = self.parent
                     l_node.parent = parent
