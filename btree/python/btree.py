@@ -4,10 +4,6 @@ from dataclasses import field
 
 T = TypeVar('T', int, float, str)
 
-
-debug_cnt = [0]
-
-
 @dataclass
 class Node(Generic[T]):
     leaf: bool
@@ -29,31 +25,28 @@ class Node(Generic[T]):
             c.parent = p
 
     def validate(self) -> bool:
+        def f(vs: Set[T], vals: List[T], msg: str =''):
+            for v in vals:
+                if v in vs:
+                    print(f'INVALID: {msg}: {self}')
+                    raise Exception()
+                vs.add(v)
+
         if not self.leaf and len(self.vals) + 1 != len(self.childs):
             print(f'INVALID: {self}')
             return False
         if self.leaf and len(self.childs) > 0:
             print(f'INVALID: {self}')
             return False
-        vs = set()
-        if self.parent:   
-            for v in self.parent.vals:
-                if v in vs:
-                    print(f'INVALID: {self}')
-                    return False
-                vs.add(v)
-        for v in self.vals:
-            if v in vs:
-                print(f'INVALID: {self}')
-                return False
-            vs.add(v)
-
-        for c in self.childs:
-            for v in c.vals:
-                if v in vs:
-                    print(f'INVALID: {self}')
-                    return False
-                vs.add(v)
+        try:
+            vs = set()
+            if self.parent:
+                f(vs, self.parent.vals)
+            f(vs, self.vals)
+            for c in self.childs:
+                f(vs, c.vals)
+        except:
+            return False
             
         return True
 
@@ -264,16 +257,13 @@ class Node(Generic[T]):
                         #print('root')
                         root = self.parent
                         if l_s:
-                            root.vals = [l_s.vals[0], root.vals[0], self.vals[0]]
-                            root.childs = l_s.childs + self.childs
-                            for c in root.childs:
-                                c.parent = root
+                            r_s = self
                         else:
-                            root.vals = [self.vals[0], root.vals[0], r_s.vals[0]]
-                            root.childs = self.childs + r_s.childs
+                            l_s = self
+                            root.vals = [l_s.vals[0], root.vals[0], r_s.vals[0]]
+                            root.childs = l_s.childs + r_s.childs
                             for c in root.childs:
                                 c.parent = root
-            
 
     def delete(self, v: T):
         if len(self.vals) > 1:
