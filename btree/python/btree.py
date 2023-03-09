@@ -6,6 +6,7 @@ T = TypeVar('T', int, float, str)
 
 @dataclass
 class Node(Generic[T]):
+    n: int
     leaf: bool
     vals: List[T]
     childs: List[Self] = field(default_factory=list)
@@ -16,8 +17,11 @@ class Node(Generic[T]):
     # childs: 0,1,    2,3
 
     @classmethod
-    def new(self, v: T, leaf: bool):
-        return Node(leaf, [v])
+    def new(self, n: int, v: T|List[T], leaf: bool):
+        if type(v) == list:
+            return Node(n, leaf, v)
+        else:
+            return Node(n, leaf, [v])
 
     @classmethod
     def set_parent(self, p, childs):
@@ -79,30 +83,35 @@ class Node(Generic[T]):
         if not pos:
             pos,_ = self.pos_for_add(v)
         
-        if len(self.vals) < 3:    
+        if len(self.vals) < self.n-1:    
             self.vals.insert(pos, v)
             root = None
         else:
-            if pos in (0,1):
+            #if pos in (0,1):
+            if pos < self.n//2:
                 #print(f"add case1,case2")
             
                 l_node = self
                 # a
-                a = self.vals[0]
+                a_vs = self.vals[:self.n//2-1]
                 # b,c
-                p_v,r_v = self.vals[1:]
-                if pos == 0:
+                p_v = self.vals[self.n//2-1]
+                r_vs = self.vals[self.n//2:]
+                #p_v,r_v = self.vals[1:]
+                self.vals = a_vs
+                self.vals.insert(pos, v)
+                #if pos == 0:
                     #print(f"add case1")
-                    self.vals = [v, a]
-                else:
+                #    self.vals = [v, a]
+                #else:
                     #print(f"add case2")
-                    self.vals = [a, v]
-                r_node = Node.new(r_v, self.leaf)
+                #    self.vals = [a, v]
+                r_node = Node.new(self.n, r_vs, self.leaf)
                 if not self.leaf:
                     childs = self.childs
-                    l_node.childs = childs[:2]
+                    l_node.childs = childs[:self.n//2]
                     Node.set_parent(l_node, l_node.childs)
-                    r_node.childs = childs[2:]
+                    r_node.childs = childs[self.n//2:]
                     Node.set_parent(r_node, r_node.childs)
 
                 if self.parent:
@@ -119,21 +128,26 @@ class Node(Generic[T]):
                 
                 r_node = self
                 # c
-                c_v = self.vals[-1]
+                #c_v = self.vals[-1]
+                c_vs = self.vals[self.n//2:]
                 # a,b
-                l_v,p_v = self.vals[:2]
-                if pos == 2:
+                l_vs = self.vals[:self.n//2 - 1]
+                p_v = self.vals[self.n//2 - 1]
+                
+                self.vals = c_vs
+                self.vals.insert(pos-self.n//2, v)
+                #if pos == 2:
                     #print(f"add case3")
-                    self.vals = [v, c_v]
-                else:
+                #    self.vals = [v, c_v]
+                #else:
                     #print(f"add case4")
-                    self.vals = [c_v, v]
-                l_node = Node.new(l_v, self.leaf)
+                #    self.vals = [c_v, v]
+                l_node = Node.new(self.n, l_vs, self.leaf)
                 if not self.leaf:
                     childs = self.childs
-                    l_node.childs = childs[:2]
+                    l_node.childs = childs[:self.n//2]
                     Node.set_parent(l_node, l_node.childs)
-                    r_node.childs = childs[2:]
+                    r_node.childs = childs[self.n//2:]
                     Node.set_parent(r_node, r_node.childs)
                     
                 if self.parent:
@@ -146,7 +160,7 @@ class Node(Generic[T]):
 
             if not self.parent:
                 # root
-                self.parent = Node.new(p_v, False)
+                self.parent = Node.new(self.n, p_v, False)
                 l_node.parent = self.parent
                 r_node.parent = self.parent
                 self.parent.childs = [l_node, r_node]
@@ -344,10 +358,11 @@ class Node(Generic[T]):
                 c.print_rec(d+1)
 
 
-class Tree234(Generic[T]):
+class BTree(Generic[T]):
 
-    def __init__(self) -> None:
+    def __init__(self, n=4) -> None:
         self.root = None
+        self.n = n
         pass
 
     def search(self, v: T):
@@ -369,7 +384,7 @@ class Tree234(Generic[T]):
 
     def add(self, v: T):
         if self.root == None:
-            self.root = Node.new(v, True)
+            self.root = Node.new(self.n, v, True)
         else:
             if self.search(v):
                 return
@@ -442,7 +457,7 @@ class Tree234(Generic[T]):
 def main():
     import random
     random.seed(1)
-    t = Tree234()
+    t = BTree(6)
     try:
         def add_proc(i):
             print(f"add: {i * 10}")
@@ -484,9 +499,10 @@ def main():
         for _ in range(1000):
             i = random.randint(1, 1000)
             delete_proc(i)
-
-    except:
-        pass
+    finally:
+        t.print_tree()
+    #except:
+    #    pass
         #t.print_tree()
 
 if __name__ == '__main__':
