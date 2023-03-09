@@ -229,8 +229,6 @@ class Node(Generic[T]):
 
                         Node.set_parent(self, r_s.childs)
                         self.childs = self.childs + r_s.childs
-
-
                     elif l_s and len(l_s.vals) == 1:
                         #print('case4')
                         i = self.parent.childs.index(self)
@@ -265,8 +263,6 @@ class Node(Generic[T]):
             self.vals.remove(v)
             return
         else:
-            
-            pos,_ = self.pos(v)
             l_s = self.left_sibling()
             r_s = self.right_sibling()
             if r_s and len(r_s.vals) > 1:
@@ -360,7 +356,7 @@ class Tree234(Generic[T]):
         else:
             cur = self.root
             while True:
-                pos,flag = cur.pos(v)
+                _,flag = cur.pos(v)
                 if flag:
                     return True
                 else:
