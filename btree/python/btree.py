@@ -267,10 +267,9 @@ class Node(Generic[T]):
                             r_s = self
                         else:
                             l_s = self
-                            root.vals = [l_s.vals[0], root.vals[0], r_s.vals[0]]
-                            root.childs = l_s.childs + r_s.childs
-                            for c in root.childs:
-                                c.parent = root
+                        root.vals = [l_s.vals[0], root.vals[0], r_s.vals[0]]
+                        root.childs = l_s.childs + r_s.childs
+                        Node.set_parent(root, root.childs)
 
     def delete(self, v: T):
         if len(self.vals) > 1:
