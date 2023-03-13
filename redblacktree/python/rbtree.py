@@ -65,7 +65,7 @@ class Node(Generic[T]):
     def is_right_child(self) -> bool:
         return self.parent.right == self
 
-    def replace(self, node: Self) -> Self:
+    def replace(self, node: Optional[Self]) -> Self:
         if self.is_left_child():
             self.parent.set_left(node)
         else:
@@ -687,80 +687,20 @@ class Node(Generic[T]):
         print(f"delete at:{self} parent:{self.parent}")
         #if self.rb_type == Node.RED:
         if not self.is_single_node():
-            if not self.parent:
-                    if self.left:
-                        left = self.left
-                        left.parent = None
-                        left.right = self.right
-                        left.rb_type = Node.BLACK
-                        if left.right:
-                            left.right.rb_type = Node.RED
-                        return left
-                    else:
-                        right = self.right
-                        right.parent = None
-                        right.left = self.left
-                        right.rb_type = Node.BLACK
-                        if right.left:
-                            right.left.rb_type = Node.RED
-                        return right
-            if self.is_left_child():
-                if self.right:
-                    self.parent.left = self.right
-                    self.parent.left.parent = self.parent
-                    if self.parent.rb_type == Node.RED:
-                        self.parent.left.rb_type = Node.BLACK
-                    else:
-                        if self.parent.right.rb_type == Node.BLACK:
-                            self.parent.left.rb_type = Node.BLACK
-                        else:
-                            self.parent.left.rb_type = Node.RED
-                elif self.left:
-                    self.parent.left = self.left
-                    self.parent.left.parent = self.parent
-                    if self.parent.rb_type == Node.RED:
-                        self.parent.left.rb_type = Node.BLACK
-                    else:
-                        if self.parent.right.rb_type == Node.BLACK:
-                            self.parent.left.rb_type = Node.BLACK
-                        else:
-                            self.parent.left.rb_type = Node.RED
-                else:
-                    self.parent.left = None
-                
+            if self.parent:
+                self.replace(self.left)
             else:
-                if self.right:
-                    self.parent.right = self.right
-                    self.parent.right.parent = self.parent
-                    #self.parent.right.rb_type = Node.BLACK
-                    if self.parent.rb_type == Node.RED:
-                        self.parent.right.rb_type = Node.BLACK
-                    else:
-                        if not self.parent.left or self.parent.left.rb_type == Node.BLACK:
-                            self.parent.right.rb_type = Node.BLACK
-                        else:
-                            self.parent.right.rb_type = Node.RED
-                elif self.left:
-                    self.parent.right = self.left
-                    self.parent.right.parent = self.parent
-                    if self.parent.rb_type == Node.RED:
-                        self.parent.right.rb_type = Node.BLACK
-                    else:
-                        if self.parent.left.rb_type == Node.BLACK:
-                            self.parent.right.rb_type = Node.BLACK
-                        else:
-                            self.parent.right.rb_type = Node.RED
-                else:
-                    self.parent.right = None
-
-            return None
+                if self.left:
+                    self.left.parent = None
+                    return self.left
+            return None 
         else:
             if cnt > 5:
                 return None
             ret,flag = self.reconstruct_for_delete(tree)
             
             
-            self.delete(v, cnt+1)
+            ret = self.delete(v, cnt+1)
             if tree:
                 print('tree')
                 tree.root.print_rec()
@@ -774,6 +714,25 @@ class Node(Generic[T]):
             else:
                 return 'r:'
         return f"{f(self.rb_type)}{self.val}"
+
+    def print_pre(self, d=0):
+        #if d > 4:
+        #    return
+        ind = f"{d:>3} " + ' ' * d
+        print(ind + f"{self} parent:{self.parent}")
+        if not self.left and not self.right:
+            return
+        if self.left:
+            self.left.print_pre(d+1)
+        else:
+            ind = f"{d+1:>3} " + ' ' * (d+1)
+            print(ind + '-')
+        
+        if self.right:
+            self.right.print_pre(d+1)
+        else:
+            ind = f"{d+1:>3} " + ' ' * (d+1)
+            print(ind + '-')   
 
     def print_rec(self, d=0):
         #if d > 4:
@@ -804,21 +763,18 @@ class TreeRB(Generic[T]):
         self.root = None
         pass
 
-    def search(self, v: T):
-        if self.root == None:
-            return False
-        else:
-            cur = self.root
-            while cur:
-                if cur.val == v:
-                    return True
+    def search(self, v: T):        
+        cur = self.root
+        while cur:
+            if cur.val == v:
+                return True
+            else:
+                if v < cur.val:
+                    cur = cur.left
                 else:
-                    if v < cur.val:
-                        cur = cur.left
-                    else:
-                        cur = cur.right
-                
-            return False
+                    cur = cur.right
+            
+        return False
 
 
     def add(self, v: T):
@@ -912,12 +868,42 @@ def main():
         def delete_proc(i):
             print(f"delete: {i * 10}")
 
+            
             t.delete(i * 10)
             return
             t.validate()
 
+        t = TreeRB()
+        add_proc(10)
+        add_proc(20)
+        add_proc(30)
+        t.print_tree()
+
+        delete_proc(10)
+        t.print_tree()
+
+        t = TreeRB()
+        add_proc(10)
+        add_proc(20)
+        add_proc(30)
+        t.print_tree()
+
+        delete_proc(20)
+        t.print_tree()
+
+        t = TreeRB()
+        add_proc(10)
+        add_proc(20)
+        add_proc(30)
+        t.print_tree()
+
+        delete_proc(30)
+        t.print_tree()        
+
+        #return
+        t = TreeRB()
         vals = []
-        n = 26
+        n = 20
         size = 1000
         for _ in range(n):
             i = random.randint(1, size)
@@ -926,10 +912,15 @@ def main():
             t.print_tree()
 
         for cnt, i in enumerate(vals):
-            if cnt >= 0:
-                break
+            print(f"cnt:{cnt}")
             delete_proc(i)
             t.print_tree()
+
+            for i2 in vals[cnt+1:]:
+                if not t.search(i2 * 10):
+                    print(f'SEARCH FAILED {i2 * 10}')
+                    raise Exception()
+
         
         return
     
