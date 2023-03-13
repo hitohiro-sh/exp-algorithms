@@ -70,8 +70,21 @@ class Node(Generic[T]):
             self.parent.set_left(node)
         else:
             self.parent.set_right(node)
-        return self
+        return node
 
+    def inplace_replace(self, node: Self) -> Self:
+        val = self.val
+        left = self.left
+        right = self.right
+        self.val = node.val
+        self.set_left(node.left)
+        self.set_right(node.right)
+        node.val = val
+        node.set_left(left)
+        node.set_right(right)
+
+        return node
+    
     def rotate_right2(self) -> Self:
         # p(d(e,c),v)
         # d(e,p(c,v))
@@ -81,6 +94,8 @@ class Node(Generic[T]):
         e = d.left
         c = d.right
 
+        print(f"rotate_right2 v:{v} p:{p} d:{d} e:{e} c:{c}")
+
         if p.parent:
             p.replace(d)
         else:
@@ -89,6 +104,8 @@ class Node(Generic[T]):
         d.set_right(p)
         p.set_left(c)
         p.set_right(v)
+
+        #d.print_rec()
 
         return d
         
@@ -117,95 +134,125 @@ class Node(Generic[T]):
 
     def rotate_left(self) -> Self:
         # l[parent.left]<-p[parent]<-v[self]
-        # p(c(),a(,v))
-        # a(p(c,),v)
-        
         v = self
-        if v.is_left_child():
-            print(f"rotate left case1")
-            vp = v.parent
-            self.parent.parent.right = v
-            self.parent.parent.right.parent = self.parent.parent
-            v.right = vp
-            v.right.parent = v
-            vp.right = None
-            vp.left = None
-
-            a = v
+        if v.is_right_child():
+            # p(c,a(d,v))
+            # a(p(c,d),v)
+            
+            a = v.parent
             p = a.parent
-        else:
-            print(f"rotate left case2")
-            a = self.parent
-            p = self.parent.parent
-        
-        p.right = None
-        p_parent = p.parent
-        if p.parent:
-            if p.is_left_child():
-                p_parent.left = a
-                p_parent.left.parent = p_parent
-            else:
-                p_parent.right = a
-                p_parent.right.parent = p_parent
-        a.left = p
-        a.left.parent = a
+            c = p.left
+            d = a.left
+            
+            p.inplace_replace(a)
+            tmp = a
+            a = p
+            p = tmp
 
-        return a
+            #a.set_right(v)
+            a.set_left(p)
+            p.set_right(d)
+
+
+
+            return a
+        else:
+            # p(c,a(v(d,e),f))
+            # v(p(c,e),a(d,f))
+            v = self
+            d = v.left
+            e = v.right
+            a = v.parent
+            f = a.right
+            p = a.parent
+
+            p.inplace_replace(v)
+            tmp = v
+            v = p
+            p = tmp 
+
+            #if p.parent:
+            #    p.replace(v)
+            #else:
+            #    v.parent = None
+            v.set_right(a)
+            v.set_left(p)
+            p.set_right(e)
+            a.set_left(d)
+            
+            return v
 
     def rotate_right(self) -> Self:
         # v[self]->p[parent]->r[parent.right]
 
         v = self
-        if v.is_right_child():
-            print(f"rotate right case3")
-            vp = v.parent
-            self.parent.parent.left = v
-            self.parent.parent.left.parent = self.parent.parent
-            v.left = vp
-            v.left.parent = v
-            vp.left = None
-            vp.right = None
+        if v.is_left_child():
+            # p(a(v,d),c)
+            # a(v,p(d,c))
 
-            a = v
+            v = self
+            a = v.parent
             p = a.parent
+            c = p.right
+            d = a.right
+            
+            p.inplace_replace(a)
+            tmp = a
+            a = p
+            p = tmp            
+
+            #a.set_left(v)
+            a.set_right(p)
+            p.set_left(d)
+
+
+
+            return a
         else:
-            print(f"rotate right case4")
-            a = self.parent
-            p = self.parent.parent
+            # p(a(f,v(e,d)),c)
+            # v(a(f,d),p(e,c))
+            v = self
+            d = v.right
+            e = v.left
+            a = v.parent
+            f = a.left
+            p = a.parent
 
-        p.left = None
-        p_parent = p.parent
-        if p.parent:
-            if p.is_left_child():
-                p_parent.left = a
-                p_parent.left.parent = p_parent
-            else:
-                p_parent.right = a
-                p_parent.right.parent = p_parent
-        a.right = p
-        a.right.parent = a
+            p.inplace_replace(v)
+            tmp = v
+            v = p
+            p = tmp
+            #if p.parent:
+            #    p.replace(v)
+            #else:
+            #    v.parent = None
+            v.set_left(a)
+            v.set_right(p)
+            p.set_left(e)
+            a.set_right(d)
+            
+            return v
 
-        return a
 
     def reconstruct(self) -> Optional[Self]:
         #if self.parent.rb_type == Node.RED:
         if Node.is_red(self.parent):
-            print(f"re {self.parent} {self.parent.parent} {self.parent.parent.right}")
+            print(f"reconst {self.parent} {self.parent.parent} {self.parent.parent.right}")
             if self.parent.is_left_child():
                 
                 if Node.is_black_null(self.parent.parent.right):
                     print('case1')
 
-                    pparent = self.parent.parent
-                    ppp = pparent.parent
+                    #pparent = self.parent.parent
+                    #ppp = pparent.parent
                     p = self.rotate_right()
                     p.right.set_type(Node.RED)
                     
                    
                     p.set_type(Node.BLACK)
                     
-                    if not ppp:
-                        p.parent = None
+                    if not p.parent:
+                        #p.parent = None
                         p.set_type(Node.BLACK)
                         return p
                     else:
@@ -225,17 +272,18 @@ class Node(Generic[T]):
                 if Node.is_black_null(self.parent.parent.left):
                 #if not self.parent.parent.left or self.parent.parent.left.rb_type == Node.BLACK:
                     print('case3')
-                    pparent = self.parent.parent
-                    ppp = pparent.parent
+                    #pparent = self.parent.parent
+                    #ppp = pparent.parent
                     #print(f"{pparent}")
                     p = self.rotate_left()
+                    
                     p.left.rb_type = Node.RED
                     #pparent.left = p
                     #pparent.left.parent = pparent
                     p.rb_type = Node.BLACK
                     #p.right.rb_type = Node.RED
-                    if not ppp:
-                        p.parent = None
+                    if not p.parent:
+                        #p.parent = None
                         p.rb_type = Node.BLACK
                         return p
                     else:
@@ -304,31 +352,24 @@ class Node(Generic[T]):
             node = self
         if not node.parent:
             return None
-        if node.parent.rb_type == Node.BLACK:
+        if Node.is_black(node.parent):
             if node.is_left_child():
                 return None
             else:
-                if not node.parent.left or node.parent.left.rb_type == Node.BLACK:
-                    print("left sibling case2")
+                if Node.is_black_null(node.parent.left):
                     return node.parent.left
                 else:
-                    print("left sibling case3")
                     return node.parent.left.right
         else:
+            # Node.is_red(node.parent)
             if node.is_left_child():
-                if node.parent.is_left_child():
-                    return None
-                else:
-                    if not node.parent.parent.left:
-                        return None
-                    if node.parent.parent.left.rb_type == Node.BLACK:
-                        print("left sibling case5")
+                
+                if node.parent.is_right_child():
+                    if Node.is_black_null(node.parent.parent.left):
                         return node.parent.parent.left
                     else:
-                        print("left sibling case6")
                         return node.parent.parent.left.right
             else:
-                print("left sibling case7")
                 return node.parent.left
             
     def right_sibling_group(self) -> Self:
@@ -339,31 +380,26 @@ class Node(Generic[T]):
             node = self
         if not node.parent:
             return None
-        if node.parent.rb_type == Node.BLACK:
+        if Node.is_black(node.parent):
             if node.is_right_child():
                 return None
             else:
-                if not node.parent.right or node.parent.right.rb_type == Node.BLACK:
-                    print("right sibling case2")
+                if Node.is_black_null(node.parent.right):
                     return node.parent.right
                 else:
-                    print("right sibling case3")
                     return node.parent.right.left
         else:
+            # Node.is_red(node.parent)
             if node.is_right_child():
-                if node.parent.is_right_child():
-                    return None
-                else:
-                    if node.parent.parent.right.rb_type == Node.BLACK:
-                        print("right sibling case5")
+                
+                if node.parent.is_left_child():
+                    if Node.is_black_null(node.parent.parent.right):
                         return node.parent.parent.right
                     else:
-                        print("right sibling case6")
                         return node.parent.parent.right.left
             else:
-                print("right sibling case7")
                 return node.parent.right
-
+            
     def pop_left(self) -> Tuple[T,Self]:
 
         if self.rb_type == Node.BLACK:
@@ -438,7 +474,7 @@ class Node(Generic[T]):
         else:
             l_s = self.left_sibling_group()
             r_s = self.right_sibling_group()
-            print(f'delete {l_s} {self} {r_s}')
+            print(f'delete l_s:{l_s} self:{self} r_s:{r_s}')
             root = None
             
             if r_s and not r_s.is_single_node():
@@ -684,14 +720,34 @@ class Node(Generic[T]):
         #return None
 
     def delete(self, v: T, cnt=0, tree=None):
+        
         print(f"delete at:{self} parent:{self.parent}")
         #if self.rb_type == Node.RED:
         if not self.is_single_node():
+            #b(r,r)
+            #b(,r)
+            #b(r,)
             if self.parent:
-                self.replace(self.left)
+                if Node.is_red(self):
+                    self.replace(None)
+                else:
+                    #b(r,)
+                    print(f"delete call self:{self} parent:{self.parent}")
+                    if self.right and self.left:
+                        raise Exception()
+                    
+                    if self.right:
+                        self.replace(self.right)
+                        self.right.set_type(Node.BLACK)
+                    else:
+                        self.replace(self.left)
+                        self.left.set_type(Node.BLACK)
+
             else:
                 if self.left:
                     self.left.parent = None
+                    self.left.set_type(Node.BLACK)
+                    
                     return self.left
             return None 
         else:
@@ -700,7 +756,7 @@ class Node(Generic[T]):
             ret,flag = self.reconstruct_for_delete(tree)
             
             
-            ret = self.delete(v, cnt+1)
+            self.delete(v, cnt+1)
             if tree:
                 print('tree')
                 tree.root.print_rec()
@@ -708,12 +764,14 @@ class Node(Generic[T]):
             return ret
 
     def __repr__(self):
-        def f(v):
-            if v == Node.BLACK:
-                return 'b:'
+        def f(node):
+            if not node:
+                return "null"
+            if node.rb_type == Node.BLACK:
+                return f'b:{node.val}'
             else:
-                return 'r:'
-        return f"{f(self.rb_type)}{self.val}"
+                return f'r:{node.val}'
+        return f"[{f(self)} left:{f(self.left)} right:{f(self.right)}]"
 
     def print_pre(self, d=0):
         #if d > 4:
@@ -735,8 +793,8 @@ class Node(Generic[T]):
             print(ind + '-')   
 
     def print_rec(self, d=0):
-        #if d > 4:
-        #    return
+        if d > 4:
+            return
         #ind = f"{d:>3} " + ' ' * d
         #print(ind + f"{self} parent:{self.parent}")
         if not self.left and not self.right:
@@ -765,7 +823,10 @@ class TreeRB(Generic[T]):
 
     def search(self, v: T):        
         cur = self.root
+
+        vi = set()
         while cur:
+            vi.add(cur.val)
             if cur.val == v:
                 return True
             else:
@@ -773,7 +834,8 @@ class TreeRB(Generic[T]):
                     cur = cur.left
                 else:
                     cur = cur.right
-            
+                if cur and cur.val in vi:
+                    raise Exception()
         return False
 
 
@@ -903,15 +965,23 @@ def main():
         #return
         t = TreeRB()
         vals = []
-        n = 20
+        n = 30
         size = 1000
-        for _ in range(n):
+        for cnt in range(n):
             i = random.randint(1, size)
+            print(f"cnt:{cnt}")
             add_proc(i)
             vals.append(i)
             t.print_tree()
 
+            for i2 in vals:
+                if not t.search(i2 * 10):
+                    print(f'SEARCH FAILED {i2 * 10}')
+                    raise Exception()
+
         for cnt, i in enumerate(vals):
+            #if cnt >= 7:
+            #    break
             print(f"cnt:{cnt}")
             delete_proc(i)
             t.print_tree()
