@@ -300,7 +300,7 @@ class Node(Generic[T]):
             if node.is_left_child():
                 return None
             else:
-                if node.parent.left.rb_type == Node.BLACK:
+                if not node.parent.left or node.parent.left.rb_type == Node.BLACK:
                     print("left sibling case2")
                     return node.parent.left
                 else:
@@ -334,7 +334,7 @@ class Node(Generic[T]):
             if node.is_right_child():
                 return None
             else:
-                if node.parent.right.rb_type == Node.BLACK:
+                if not node.parent.right or node.parent.right.rb_type == Node.BLACK:
                     print("right sibling case2")
                     return node.parent.right
                 else:
@@ -365,15 +365,17 @@ class Node(Generic[T]):
                     c = e.right
                     v = e.val
                     p.left = c
+                    print(f"pop_left case1 p:{p} e:{e} c:{c} v:{v}")
                     if p.left:
                         p.left.parent = p
 
                     return v,e.left
 
             if self.right:
-                left = self
+                ll = self.left
                 v = self.val
                 d = self.right
+                print(f"pop_left case2 v:{v} d:{d}")
                 self.right = None
                 if d and d.rb_type == Node.RED:
                     self.val = d.val
@@ -384,12 +386,13 @@ class Node(Generic[T]):
                     if self.right:
                         self.right.parent = self
                     d = self
+                    d.rb_type = Node.BLACK
                     if d.left:
                         d.left.rb_type = Node.RED
                     if d.right:
                         d.right.rb_type = Node.RED
 
-                    return v,left.left
+                    return v,ll
         raise Exception()
 
     def pop_right(self) -> Tuple[T,Self]:
@@ -400,15 +403,17 @@ class Node(Generic[T]):
                     e = p.right
                     c = e.left
                     v = e.val
+                    print(f"pop_right case1 p:{p} e:{e} c:{c} v:{v}")
                     p.right = c
                     if p.right:
                         p.right.parent = p
 
                     return v,e.right
             if self.left:
-                right = self
+                rr = self.right
                 v = self.val
                 d = self.left
+                print(f"pop_right case2 self:{self} v:{v} d:{d}")
                 self.left = None
                 if d.rb_type == Node.RED:
                     self.val = d.val
@@ -419,19 +424,13 @@ class Node(Generic[T]):
                     if self.right:
                         self.right.parent = self
                     d = self
-                    #if self.is_left_child():
-                    #    self.parent.right = d
-                    #    self.parent.right.parent = self.parent
-                    #else:
-                    #    self.parent.left = d
-                    #    self.parent.left.parent = self.parent
-                    #d.rb_type = Node.BLACK
+                    d.rb_type = Node.BLACK
                     if d.left:
                         d.left.rb_type = Node.RED
                     if d.right:
                         d.right.rb_type = Node.RED
 
-                    return v,right.right
+                    return v,rr
         raise Exception()
 
     def reconstruct_for_delete(self,tree=None) -> Tuple[Self,bool]:
@@ -485,6 +484,10 @@ class Node(Generic[T]):
                 # case rotate
                 print('delete case2')
 
+                if tree:
+                    print('delete case2')
+                    tree.print_tree()
+
                 l_v,l_c = l_s.pop_right()
                 if l_s.parent.rb_type == Node.BLACK:
                     parent = l_s.parent
@@ -515,6 +518,8 @@ class Node(Generic[T]):
                     o_v.left.parent = o_v
                 parent.val = l_v
                 
+
+
                 pass
             elif (not l_s or l_s.is_single_node()) and (not r_s or r_s.is_single_node()):
                 print(f"delete case3/case4 {self.parent}")
@@ -661,12 +666,14 @@ class Node(Generic[T]):
                         if self.is_left_child():
                             root.left.rb_type = Node.RED
                             root.right = r_s
-                            root.right.parent = root
-                            root.right.rb_type = Node.RED
+                            if root.right:
+                                root.right.parent = root
+                                root.right.rb_type = Node.RED
                         else:
                             root.left = l_s
-                            root.left.parent = root
-                            root.left.rb_type = Node.RED
+                            if root.left:
+                                root.left.parent = root
+                                root.left.rb_type = Node.RED
                             root.right.rb_type = Node.RED
                         #root.right.parent = root
                         
@@ -696,15 +703,44 @@ class Node(Generic[T]):
         print(f"delete at:{self} parent:{self.parent}")
         #if self.rb_type == Node.RED:
         if not self.is_single_node():
+            if not self.parent:
+                    if self.left:
+                        left = self.left
+                        left.parent = None
+                        left.right = self.right
+                        left.rb_type = Node.BLACK
+                        if left.right:
+                            left.right.rb_type = Node.RED
+                        return left
+                    else:
+                        right = self.right
+                        right.parent = None
+                        right.left = self.left
+                        right.rb_type = Node.BLACK
+                        if right.left:
+                            right.left.rb_type = Node.RED
+                        return right
             if self.is_left_child():
                 if self.right:
                     self.parent.left = self.right
                     self.parent.left.parent = self.parent
-                    self.parent.left.rb_type = Node.BLACK
+                    if self.parent.rb_type == Node.RED:
+                        self.parent.left.rb_type = Node.BLACK
+                    else:
+                        if self.parent.right.rb_type == Node.BLACK:
+                            self.parent.left.rb_type = Node.BLACK
+                        else:
+                            self.parent.left.rb_type = Node.RED
                 elif self.left:
                     self.parent.left = self.left
                     self.parent.left.parent = self.parent
-                    self.parent.left.rb_type = Node.BLACK
+                    if self.parent.rb_type == Node.RED:
+                        self.parent.left.rb_type = Node.BLACK
+                    else:
+                        if self.parent.right.rb_type == Node.BLACK:
+                            self.parent.left.rb_type = Node.BLACK
+                        else:
+                            self.parent.left.rb_type = Node.RED
                 else:
                     self.parent.left = None
                 
@@ -712,18 +748,31 @@ class Node(Generic[T]):
                 if self.right:
                     self.parent.right = self.right
                     self.parent.right.parent = self.parent
-                    self.parent.right.rb_type = Node.BLACK
+                    #self.parent.right.rb_type = Node.BLACK
+                    if self.parent.rb_type == Node.RED:
+                        self.parent.right.rb_type = Node.BLACK
+                    else:
+                        if not self.parent.left or self.parent.left.rb_type == Node.BLACK:
+                            self.parent.right.rb_type = Node.BLACK
+                        else:
+                            self.parent.right.rb_type = Node.RED
                 elif self.left:
                     self.parent.right = self.left
                     self.parent.right.parent = self.parent
-                    self.parent.right.rb_type = Node.BLACK
+                    if self.parent.rb_type == Node.RED:
+                        self.parent.right.rb_type = Node.BLACK
+                    else:
+                        if self.parent.left.rb_type == Node.BLACK:
+                            self.parent.right.rb_type = Node.BLACK
+                        else:
+                            self.parent.right.rb_type = Node.RED
                 else:
                     self.parent.right = None
 
             return None
         else:
-            if cnt > 5:
-                return None
+            #if cnt > 5:
+            #    return None
             ret,flag = self.reconstruct_for_delete(tree)
             
             
@@ -887,7 +936,7 @@ def main():
             t.validate()
 
         vals = []
-        n = 20
+        n = 24
         size = 1000
         for _ in range(n):
             i = random.randint(1, size)
