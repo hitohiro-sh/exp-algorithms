@@ -295,7 +295,8 @@ class Node(Generic[T]):
             node = self.parent
         else:
             node = self
-        
+        if not node.parent:
+            return None
         if node.parent.rb_type == Node.BLACK:
             if node.is_left_child():
                 return None
@@ -329,7 +330,8 @@ class Node(Generic[T]):
             node = self.parent
         else:
             node = self
-        
+        if not node.parent:
+            return None
         if node.parent.rb_type == Node.BLACK:
             if node.is_right_child():
                 return None
@@ -523,6 +525,8 @@ class Node(Generic[T]):
                 pass
             elif (not l_s or l_s.is_single_node()) and (not r_s or r_s.is_single_node()):
                 print(f"delete case3/case4 {self.parent}")
+                if not self.parent:
+                    return self,False
                 if not self.parent.is_single_node():
                     print(f"delete case3/case4 step2 l_s:{l_s} self:{self} r_s:{r_s}")
                     # case merge
@@ -771,8 +775,8 @@ class Node(Generic[T]):
 
             return None
         else:
-            #if cnt > 5:
-            #    return None
+            if cnt > 5:
+                return None
             ret,flag = self.reconstruct_for_delete(tree)
             
             
