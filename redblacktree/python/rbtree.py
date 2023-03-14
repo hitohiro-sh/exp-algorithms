@@ -162,7 +162,7 @@ class Node(Generic[T]):
             return a
         else:
             # p(c,a(v(d,e),f))
-            # v(p(c,e),a(d,f))
+            # v(p(c,d),a(e,f))
             v = self
             d = v.left
             e = v.right
@@ -181,8 +181,8 @@ class Node(Generic[T]):
             #    v.parent = None
             v.set_right(a)
             v.set_left(p)
-            p.set_right(e)
-            a.set_left(d)
+            p.set_right(d)
+            a.set_left(e)
             
             p.set_type(Node.RED)
 
@@ -193,6 +193,7 @@ class Node(Generic[T]):
 
         v = self
         if v.is_left_child():
+            _log('rotate right case1')
             # p(a(v,d),c)
             # a(v,p(d,c))
 
@@ -215,8 +216,9 @@ class Node(Generic[T]):
 
             return a
         else:
+            _log('rotate right case2')
             # p(a(f,v(e,d)),c)
-            # v(a(f,d),p(e,c))
+            # v(a(f,e),p(d,c))
             v = self
             d = v.right
             e = v.left
@@ -234,10 +236,12 @@ class Node(Generic[T]):
             #    v.parent = None
             v.set_left(a)
             v.set_right(p)
-            p.set_left(e)
-            a.set_right(d)
+            p.set_left(d)
+            a.set_right(e)
             
             p.set_type(Node.RED)
+
+            v.print_rec(_p=_log)
 
             return v
 
@@ -1024,7 +1028,42 @@ def main():
         
         test("test8", test_data8, [10,20,30])
 
-        return
+        def test_data9():
+            t = TreeRB()
+            t.add(20)
+            t.add(10)
+            t.add(30)
+            t.add(40)
+            t.add(50)
+            t.add(60)
+            t.add(70)
+            t.add(80)
+            t.add(90)
+            t.delete(70)
+            t.add(100)
+            return t
+
+        test("test9", test_data9, [10,20,30,40,50,60,70,80,90,100])
+
+        def test_data10():
+            t = TreeRB()
+            t.add(20)
+            t.add(10)
+            t.add(30)
+            t.add(40)
+            t.add(50)
+            t.add(60)
+            t.add(70)
+            t.add(80)
+            t.add(90)
+            t.delete(70)
+            t.add(100)
+            t.delete(10)
+            return t
+
+        test("test10", test_data10, [100,10,30,40,50,60,70,80,90,20])
+
+        #return
         t = TreeRB()
         vals = []
         n = 30
