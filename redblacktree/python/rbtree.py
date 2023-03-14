@@ -3,7 +3,7 @@ from dataclasses import dataclass
 from dataclasses import field
 
 def _log(msg):
-    print(f"LOG: {msg}")
+    #print(f"LOG: {msg}")
     pass
 
 T = TypeVar('T', int, float, str)
@@ -472,7 +472,7 @@ class Node(Generic[T]):
                     return v,rr
         raise Exception()
 
-    def reconstruct_for_delete(self,tree=None) -> Tuple[Self,bool]:
+    def reconstruct_for_delete(self) -> Self:
         _log("reconst")
         if not self.is_single_node():
             raise Exception()
@@ -486,17 +486,17 @@ class Node(Generic[T]):
                 # case rotate
                 _log(f'delete case1 {l_s} {r_s}')
 
-                if tree:
-                    _log('delete case1 pop left begin')
-                    tree.root.print_rec(_p=_log)
+                #if tree:
+                #    _log('delete case1 pop left begin')
+                #    tree.root.print_rec(_p=_log)
 
                 
 
                 r_v,r_c = r_s.pop_left()
 
-                if tree:
-                    _log('delete case1 pop left end')
-                    tree.root.print_rec(_p=_log)
+                #if tree:
+                #    _log('delete case1 pop left end')
+                #    tree.root.print_rec(_p=_log)
                 
                 #p_v = r_s.parent.val
                 if Node.is_black(r_s.parent):
@@ -524,9 +524,9 @@ class Node(Generic[T]):
                 # case rotate
                 _log('delete case2')
 
-                if tree:
-                    _log('delete case2')
-                    tree.print_tree(_p=_log)
+                #if tree:
+                #    _log('delete case2')
+                #    tree.print_tree(_p=_log)
 
                 l_v,l_c = l_s.pop_right()
                 if Node.is_black(l_s.parent):
@@ -576,7 +576,7 @@ class Node(Generic[T]):
 
                             if not p.parent:
                                 root = p
-                                #return p,False
+                                
                         elif r_s.parent.rb_type == Node.BLACK:
                             _log("delete case3.3")
                             p = r_s.rotate_right2()
@@ -587,7 +587,7 @@ class Node(Generic[T]):
 
                             if not p.parent:
                                 root = p
-                                #return p,False
+                                
                         elif self.parent.rb_type == Node.RED and r_s.parent.rb_type == Node.RED:
                             _log("delete case3.4")
                             v = self
@@ -639,7 +639,7 @@ class Node(Generic[T]):
 
                             if not p.parent:
                                 root = p
-                                #return p,False
+                                
                         elif l_s.parent.rb_type == Node.BLACK:
                             _log("delete case4.3")
                             p = l_s.rotate_left2()
@@ -650,7 +650,7 @@ class Node(Generic[T]):
                             
                             if not p.parent:
                                 root = p
-                                #return p,False
+                                
                         elif self.parent.rb_type == Node.RED and l_s.parent.rb_type == Node.RED:
                             _log("delete case4.4")
                             v = self
@@ -684,11 +684,11 @@ class Node(Generic[T]):
                 else:
                     _log(f'case root {self} {self.parent}')
                     if self.parent.parent:
-                        ret,_ = self.parent.reconstruct_for_delete(tree)
-                        if tree:
-                            _log("reconst case root tree:")
-                            tree.root.print_rec(_p=_log)
-                        return ret,True
+                        ret = self.parent.reconstruct_for_delete()
+                        #if tree:
+                        #    _log("reconst case root tree:")
+                        #    tree.root.print_rec(_p=_log)
+                        return ret
                     else:
                         # case root
                         _log(f'root {l_s} {self} {r_s}')
@@ -710,25 +710,16 @@ class Node(Generic[T]):
                         
                         #root.left = l_s
                         #root.left.parent = root
-            if tree:
-                _log("reconst tree:")
-                tree.print_tree(_p=_log)
-            return root,False
+            #if tree:
+            #    _log("reconst tree:")
+            #    tree.print_tree(_p=_log)
+            return root
 
     def is_single_node(self) -> bool:
         if self.rb_type == Node.BLACK:
             if Node.is_black_null(self.left) and Node.is_black_null(self.right):
-            #if ((not self.left or self.left.rb_type == Node.BLACK) 
-            #    and (not self.right or self.right.rb_type == Node.BLACK)):
                 return True
         return False
-
-    def _delete(self, v: T):
-        if self.is_left_child():
-            self.parent.left = None
-        else:
-            self.parent.right = None
-        #return None
 
     def delete(self, v: T, cnt=0, tree=None):
         
@@ -764,7 +755,7 @@ class Node(Generic[T]):
         else:
             #if cnt > 5:
             #    return None
-            ret,flag = self.reconstruct_for_delete(tree)
+            ret = self.reconstruct_for_delete()
             
             
             self.delete(v, cnt+1)
