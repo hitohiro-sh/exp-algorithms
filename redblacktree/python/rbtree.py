@@ -430,12 +430,7 @@ class Node(Generic[T]):
                     self.set_right(d.right)
                     d = self
                     d.set_type(Node.BLACK)
-                    # =DEBUG=
-                    #if d.left:
-                    #    d.left.set_type(Node.RED)
-                    #if d.right:
-                    #    d.right.set_type(Node.RED)
-                    # ==
+                    
                     return v,ll
         raise Exception()
 
@@ -463,12 +458,7 @@ class Node(Generic[T]):
                     self.set_right(d.right)
                     d = self
                     d.set_type(Node.BLACK)
-                    # =DEBUG=
-                    #if d.left:
-                    #    d.left.set_type(Node.RED)
-                    #if d.right:
-                    #    d.right.set_type(Node.RED)
-                    # ==
+                    
                     return v,rr
         raise Exception()
 
