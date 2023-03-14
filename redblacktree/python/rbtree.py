@@ -430,11 +430,12 @@ class Node(Generic[T]):
                     self.set_right(d.right)
                     d = self
                     d.set_type(Node.BLACK)
-                    if d.left:
-                        d.left.set_type(Node.RED)
-                    if d.right:
-                        d.right.set_type(Node.RED)
-
+                    # =DEBUG=
+                    #if d.left:
+                    #    d.left.set_type(Node.RED)
+                    #if d.right:
+                    #    d.right.set_type(Node.RED)
+                    # ==
                     return v,ll
         raise Exception()
 
@@ -462,11 +463,12 @@ class Node(Generic[T]):
                     self.set_right(d.right)
                     d = self
                     d.set_type(Node.BLACK)
-                    if d.left:
-                        d.left.set_type(Node.RED)
-                    if d.right:
-                        d.right.set_type(Node.RED)
-
+                    # =DEBUG=
+                    #if d.left:
+                    #    d.left.set_type(Node.RED)
+                    #if d.right:
+                    #    d.right.set_type(Node.RED)
+                    # ==
                     return v,rr
         raise Exception()
 
@@ -485,10 +487,16 @@ class Node(Generic[T]):
                 _log(f'delete case1 {l_s} {r_s}')
 
                 if tree:
-                    _log('delete case1')
+                    _log('delete case1 pop left begin')
                     tree.root.print_rec(_p=_log)
 
+                
+
                 r_v,r_c = r_s.pop_left()
+
+                if tree:
+                    _log('delete case1 pop left end')
+                    tree.root.print_rec(_p=_log)
                 
                 #p_v = r_s.parent.val
                 if Node.is_black(r_s.parent):
@@ -1066,13 +1074,14 @@ def main():
         #return
         t = TreeRB()
         vals = []
-        n = 30
+        n = 50
         size = 1000
         for cnt in range(n):
             i = random.randint(1, size)
             print(f"cnt:{cnt}")
             add_proc(i)
-            vals.append(i)
+            if i not in vals:
+                vals.append(i)
             t.print_tree()
 
             for i2 in vals:
@@ -1085,15 +1094,18 @@ def main():
             #    break
             print(f"cnt:{cnt}")
             delete_proc(i)
+            print(f"=== delete:{i * 10} ===")
             t.print_tree()
+            print("===")
 
+            #print(vals)
             for i2 in vals[cnt+1:]:
                 if not t.search(i2 * 10):
                     print(f'SEARCH FAILED {i2 * 10}')
                     raise Exception()
 
         
-        return
+        #return
     
 
         for _ in range(10000):
