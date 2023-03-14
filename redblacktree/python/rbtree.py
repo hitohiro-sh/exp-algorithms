@@ -626,25 +626,16 @@ class Node(Generic[T]):
                             c = l_s
 
                             if p.parent:
-                                if p.is_left_child():
-                                    p.parent.left = d
-                                    p.parent.left.parent = p.parent
-                                else:
-                                    p.parent.right = d
-                                    p.parent.right.parent = p.parent
+                                p.replace(d)
                             else:
                                 d.parent = None
                                 root = d
                             
-                            d.rb_type = Node.BLACK
-                            d.left = e
-                            d.left.parent = d
-                            e.right = p
-                            e.right.parent = e
-                            p.left = c
-                            p.left.parent = p
-                            p.right = v
-                            p.right.parent = p
+                            d.set_type(Node.BLACK)
+                            d.set_left(e)
+                            e.set_right(p)
+                            p.set_left(c)
+                            p.set_right(v)
 
                         pass
                 else:
@@ -661,17 +652,15 @@ class Node(Generic[T]):
                         
                         root = self.parent
                         if self.is_left_child():
-                            root.left.rb_type = Node.RED
-                            root.right = r_s
+                            root.left.set_type(Node.RED)
+                            root.set_right(r_s)
                             if root.right:
-                                root.right.parent = root
-                                root.right.rb_type = Node.RED
+                                root.right.set_type(Node.RED)
                         else:
-                            root.left = l_s
+                            root.set_left(l_s)
                             if root.left:
-                                root.left.parent = root
-                                root.left.rb_type = Node.RED
-                            root.right.rb_type = Node.RED
+                                root.left.set_type(Node.RED)
+                            root.right.set_type(Node.RED)
                       
             #if tree:
             #    _log("reconst tree:")
@@ -679,7 +668,7 @@ class Node(Generic[T]):
             return root
 
     def is_single_node(self) -> bool:
-        if self.rb_type == Node.BLACK:
+        if Node.is_black(self):
             if Node.is_black_null(self.left) and Node.is_black_null(self.right):
                 return True
         return False
@@ -687,7 +676,7 @@ class Node(Generic[T]):
     def delete(self, v: T, cnt=0, tree=None):
         
         _log(f"delete at:{self} parent:{self.parent}")
-        #if self.rb_type == Node.RED:
+        
         if not self.is_single_node():
             #b(r,r)
             #b(,r)
@@ -716,10 +705,7 @@ class Node(Generic[T]):
                     return self.left
             return None 
         else:
-            #if cnt > 5:
-            #    return None
             ret = self.reconstruct_for_delete()
-            
             
             self.delete(v, cnt+1)
             if tree:
@@ -740,8 +726,7 @@ class Node(Generic[T]):
         #return f"[{f(self)} left:{f(self.left)} right:{f(self.right)}]"
 
     def print_pre(self, d=0):
-        #if d > 4:
-        #    return
+        
         ind = f"{d:>3} " + ' ' * d
         print(ind + f"{self} parent:{self.parent}")
         if not self.left and not self.right:
@@ -759,10 +744,7 @@ class Node(Generic[T]):
             print(ind + '-')   
 
     def print_rec(self, d=0, _p=print):
-        #if d > 4:
-        #    return
-        #ind = f"{d:>3} " + ' ' * d
-        #print(ind + f"{self} parent:{self.parent}")
+        
         if not self.left and not self.right:
             ind = f"{d:>3} " + ' ' * d
             _p(ind + f"{self} parent:{self.parent}")
