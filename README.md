@@ -1,3 +1,3 @@
 # exp-algorithms
-B-Tree
-Red-black Tree
+- B-Tree
+- Red-black Tree
