@@ -325,7 +325,7 @@ class Node(Generic[T]):
 
     def left_sibling_group(self) -> Self:
         _log(f"left sibling:{self}")
-        if self.rb_type == Node.RED:
+        if Node.is_red(self):
             node = self.parent
         else:
             node = self
@@ -353,7 +353,7 @@ class Node(Generic[T]):
             
     def right_sibling_group(self) -> Self:
         _log(f"right sibling:{self}")
-        if self.rb_type == Node.RED:
+        if Node.is_red(self):
             node = self.parent
         else:
             node = self
@@ -381,9 +381,9 @@ class Node(Generic[T]):
             
     def pop_left(self) -> Tuple[T,Self]:
 
-        if self.rb_type == Node.BLACK:
+        if Node.is_black(self):
             if self.left:
-                if self.left.rb_type == Node.RED:
+                if Node.is_red(self.left):
                     p = self
                     e = p.left
                     c = e.right
@@ -456,14 +456,11 @@ class Node(Generic[T]):
                 #    _log('delete case1 pop left begin')
                 #    tree.root.print_rec(_p=_log)
 
-                
-
                 r_v,r_c = r_s.pop_left()
 
                 #if tree:
                 #    _log('delete case1 pop left end')
                 #    tree.root.print_rec(_p=_log)
-                
                 
                 if Node.is_black(r_s.parent):
                     parent = r_s.parent
@@ -529,27 +526,27 @@ class Node(Generic[T]):
                         if self.parent == r_s.parent:
                             _log("delete case3.1")
 
-                            self.rb_type = Node.RED
-                            r_s.rb_type = Node.RED
-                            r_s.parent.rb_type = Node.BLACK
-                        elif self.parent.rb_type == Node.BLACK:
+                            self.set_type(Node.RED)
+                            r_s.set_type(Node.RED)
+                            r_s.parent.set_type(Node.BLACK)
+                        elif Node.is_black(self.parent):
                             _log("delete case3.2")
                             p = self.rotate_left2()
-                            p.rb_type = Node.BLACK
-                            p.left.rb_type = Node.BLACK
-                            p.left.left.rb_type = Node.RED
-                            p.left.right.rb_type = Node.RED
+                            p.set_type(Node.BLACK)
+                            p.left.set_type(Node.BLACK)
+                            p.left.left.set_type(Node.RED)
+                            p.left.right.set_type(Node.RED)
 
                             if not p.parent:
                                 root = p
                                 
-                        elif r_s.parent.rb_type == Node.BLACK:
+                        elif Node.is_black(r_s.parent):
                             _log("delete case3.3")
                             p = r_s.rotate_right2()
-                            p.rb_type = Node.BLACK
-                            p.right.rb_type = Node.BLACK
-                            p.right.left.rb_type = Node.RED
-                            p.right.right.rb_type = Node.RED
+                            p.set_type(Node.BLACK)
+                            p.right.set_type(Node.BLACK)
+                            p.right.left.set_type(Node.RED)
+                            p.right.right.set_type(Node.RED)
 
                             if not p.parent:
                                 root = p
@@ -562,27 +559,22 @@ class Node(Generic[T]):
                             e = p.right
                             c = r_s
                             if p.parent:
-                                if p.is_left_child():
-                                    p.parent.left = d
-                                    p.parent.left.parent = p.parent
-                                else:
-                                    p.parent.right = d
-                                    p.parent.right.parent = p.parent
+                                p.replace(d)
                             else:
                                 d.parent = None
                                 root = d
                             
-                            d.rb_type = Node.BLACK
-                            d.right = e
-                            d.right.parent = d
-                            e.left = p
-                            e.left.parent = e
-                            p.right = c
-                            p.right.parent = p
-                            p.left = v
-                            p.left.parent = p
-                            c.rb_type = Node.RED
-                            v.rb_type = Node.RED
+                            d.set_type(Node.BLACK)
+                            d.set_right(e)
+                            
+                            e.set_left(p)
+                            
+                            p.set_right(c)
+                            
+                            p.set_left(v)
+                            
+                            c.set_type(Node.RED)
+                            v.set_type(Node.RED)
 
                         pass
                     elif l_s and l_s.is_single_node():
@@ -591,33 +583,33 @@ class Node(Generic[T]):
                         if self.parent == l_s.parent:
                             _log("delete case4.1")
 
-                            self.rb_type = Node.RED
-                            l_s.rb_type = Node.RED
-                            l_s.parent.rb_type = Node.BLACK
-                        elif self.parent.rb_type == Node.BLACK:
+                            self.set_type(Node.RED)
+                            l_s.set_type(Node.RED)
+                            l_s.parent.set_type(Node.BLACK)
+                        elif Node.is_black(self.parent):
                             _log("delete case4.2")
                             p = self.rotate_right2()
                             
-                            p.rb_type = Node.BLACK
-                            p.right.rb_type = Node.BLACK
-                            p.right.left.rb_type = Node.RED
-                            p.right.right.rb_type = Node.RED
+                            p.set_type(Node.BLACK)
+                            p.right.set_type(Node.BLACK)
+                            p.right.left.set_type(Node.RED)
+                            p.right.right.set_type(Node.RED)
 
                             if not p.parent:
                                 root = p
                                 
-                        elif l_s.parent.rb_type == Node.BLACK:
+                        elif Node.is_black(l_s.parent):
                             _log("delete case4.3")
                             p = l_s.rotate_left2()
-                            p.rb_type = Node.BLACK
-                            p.left.rb_type = Node.BLACK
-                            p.left.left.rb_type = Node.RED
-                            p.left.right.rb_type = Node.RED
+                            p.set_type(Node.BLACK)
+                            p.left.set_type(Node.BLACK)
+                            p.left.left.set_type(Node.RED)
+                            p.left.right.set_type(Node.RED)
                             
                             if not p.parent:
                                 root = p
                                 
-                        elif self.parent.rb_type == Node.RED and l_s.parent.rb_type == Node.RED:
+                        elif Node.is_red(self.parent) and Node.is_red(l_s.parent):
                             _log("delete case4.4")
                             v = self
                             p = v.parent.parent
