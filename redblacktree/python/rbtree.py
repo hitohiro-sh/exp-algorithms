@@ -269,13 +269,13 @@ class Node(Generic[T]):
                         return None
                 else:
                     _log('case4')
-                    self.parent.parent.right.rb_type = Node.BLACK
-                    self.parent.parent.left.rb_type = Node.BLACK
+                    self.parent.parent.right.set_type(Node.BLACK)
+                    self.parent.parent.left.set_type(Node.BLACK)
 
                     if self.parent.parent.parent:
-                        self.parent.parent.rb_type = Node.RED
+                        self.parent.parent.set_type(Node.RED)
                     else:
-                        self.parent.parent.rb_type = Node.BLACK
+                        self.parent.parent.set_type(Node.BLACK)
                         return self.parent.parent
                     return self.parent.parent.reconstruct()
         else:
