@@ -19,11 +19,27 @@ class Node(Generic[T]):
         node.parent = self
         self.degree += 1
 
+
+    def removeChild(self, node: Self):
+        self.childs.remove(node)
+        node.parent = None
+        self.degree -= 1
+
+
+    def removeAllChild(self) -> List[Self]:
+        childs = self.childs
+        self.childs = None
+        for c in childs:
+            c.parent = None
+        return childs
+        
+
     def print(self, d=0, _p=print):
         ind = f"{d:>3} " + ' ' * d
         _p(f"{ind}{self.val}")
         for c in self.childs:
             c.print(d+1, _p)
+
 
 @dataclass
 class FibHeap:
@@ -35,6 +51,7 @@ class FibHeap:
         x.addChild(y)
         y.mark = False
 
+
     def add(self, v: T):
         node = Node(v)
         self.root_list.append(node)
@@ -42,8 +59,19 @@ class FibHeap:
         if not min_h or min_h.val > node.val:
             min_h = node
 
+
     def pop(self) -> T:
-        pass
+        v = self.min_h
+        if v:
+            self.root_list.extend(v.removeAllChild())
+            self.root_list.remove(v)
+            if not self.root_list:
+                self.min_h = None
+            else:
+                self.min_h = self.root_list[-1]
+                self.consolidate()
+        
+        return v
 
 
     def consolidate(self) -> T:
