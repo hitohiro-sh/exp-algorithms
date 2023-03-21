@@ -4,6 +4,8 @@ from dataclasses import field
 
 T = TypeVar('T', int, float, str)
 
+
+
 @dataclass
 class Node(Generic[T]):
     val: T
@@ -15,6 +17,7 @@ class Node(Generic[T]):
     def addChild(self, node : Self):
         self.childs.append(node)
         node.parent = self
+        self.degree += 1
 
     def print(self, d=0, _p=print):
         ind = f"{d:>3} " + ' ' * d
@@ -27,25 +30,41 @@ class FibHeap:
     min_h: Node = None
     root_list: List[Node] = field(default_factory=list)
 
+    def _link(self, y: Node, x: Node):
+        self.root_list.remove(y)
+        x.addChild(y)
+        y.mark = False
+
     def add(self, v: T):
-        #if not self.root:
-        #    self.root = Node(v)
-        #else:
-        #    self._meld(Node(v))
-        pass
+        node = Node(v)
+        self.root_list.append(node)
+        
+        if not min_h or min_h.val > node.val:
+            min_h = node
+        
 
     def pop(self) -> T:
-        #root = self.root
-        #val = root.val
+        nodes = [None] * (len(self.root_list) + 1)
+        for w in self.root_list:
+            x = w
+            d = x.degree
+            while nodes[d]:
+                y = nodes[d]
+                if x.val > y.val:
+                    tmp = x
+                    x = y
+                    y = tmp
+                self._link(y, x)
+                nodes[d] = None
+                d += 1
+            nodes[d] = x
 
-        #if not self.root.childs:
-        #    self.root = None
-        #self.root = root.childs[0]
-        #for c in root.childs[1:]:
-        #    self._meld(c)
-
-        #return val
-        pass
+        self.min_h = None
+        for i in range(len(nodes)):
+            if nodes[i]:
+                self.root_list.append(nodes[i])
+                if not self.min_h or nodes[i].key < self.min_h.key:
+                    self.min_h = nodes[i]
     
     def print(self):
         if self.root:
