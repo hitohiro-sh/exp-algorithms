@@ -84,6 +84,8 @@ def main():
     t.print()
     t.pop()
     t.print()
+    t.pop()
+    t.print()
 
     pass
 
