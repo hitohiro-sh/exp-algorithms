@@ -114,6 +114,7 @@ class FibHeap(Generic[T]):
     def _decrease_key(self, x: Node[T], k: Optional[T]):
         def cut(x: Node[T], y: Node[T]):
             y.removeChild(x)
+            self.root_list.append(x)
             x.mark = False
 
         def cascading_cut(y: Node[T]):
