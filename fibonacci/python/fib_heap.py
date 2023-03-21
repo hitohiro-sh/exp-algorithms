@@ -42,11 +42,11 @@ class Node(Generic[T]):
 
 
 @dataclass
-class FibHeap:
-    min_h: Node = None
-    root_list: List[Node] = field(default_factory=list)
+class FibHeap(Generic[T]):
+    min_h: Node[T] = None
+    root_list: List[Node[T]] = field(default_factory=list)
 
-    def _link(self, y: Node, x: Node):
+    def _link(self, y: Node[T], x: Node[T]):
         self.root_list.remove(y)
         x.addChild(y)
         y.mark = False
@@ -97,12 +97,26 @@ class FibHeap:
                 if not self.min_h or nodes[i].key < self.min_h.key:
                     self.min_h = nodes[i]
     
-    def decrease_key(self, x: Node, k: Optional[T]):
-        def cut(x: Node, y: Node):
+    def decrease_key(self, x: Node[T], k: T):
+        self._decrease_key(x, k)
+
+    def delete(self, x: Node[T]):
+        self._decrease_key(x, None)
+        if x:
+            self.root_list.extend(x.removeAllChild())
+            self.root_list.remove(x)
+            if not self.root_list:
+                self.min_h = None
+            else:
+                self.min_h = self.root_list[-1]
+                self.consolidate()
+
+    def _decrease_key(self, x: Node[T], k: Optional[T]):
+        def cut(x: Node[T], y: Node[T]):
             y.removeChild(x)
             x.mark = False
 
-        def cascading_cut(y: Node):
+        def cascading_cut(y: Node[T]):
             z = y.parent
             if z:
                 if not y.mark:
@@ -122,22 +136,12 @@ class FibHeap:
             if x.val < self.min_h.val:
                 min_h.val = x
         else:
-
             y = x.parent
             if y:
                 self.cut(x, y)
                 self.cascading_cut(y)
             
-            if x:
-                self.root_list.extend(x.removeAllChild())
-                self.root_list.remove(x)
-                if not self.root_list:
-                    self.min_h = None
-                else:
-                    self.min_h = self.root_list[-1]
-                    self.consolidate()
-                    
-
+            
     def print(self):
         pass
         #if self.root:
