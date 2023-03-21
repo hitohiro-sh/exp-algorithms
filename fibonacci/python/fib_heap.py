@@ -97,11 +97,53 @@ class FibHeap:
                 if not self.min_h or nodes[i].key < self.min_h.key:
                     self.min_h = nodes[i]
     
-    def print(self):
-        if self.root:
-            self.root.print()
+    def decrease_key(self, x: Node, k: Optional[T]):
+        def cut(x: Node, y: Node):
+            y.removeChild(x)
+            x.mark = False
+
+        def cascading_cut(y: Node):
+            z = y.parent
+            if z:
+                if not y.mark:
+                    y.mark = True
+                else:
+                    cut(y, z)
+                    cascading_cut(z)
+        if k != None:
+            if k > x.val:
+                raise Exception()
+            x.val = k
+        
+            y = x.parent
+            if y and x.val < y.val:
+                self.cut(x, y)
+                self.cascading_cut(y)
+            if x.val < self.min_h.val:
+                min_h.val = x
         else:
-            print('(empty)')
+
+            y = x.parent
+            if y:
+                self.cut(x, y)
+                self.cascading_cut(y)
+            
+            if x:
+                self.root_list.extend(x.removeAllChild())
+                self.root_list.remove(x)
+                if not self.root_list:
+                    self.min_h = None
+                else:
+                    self.min_h = self.root_list[-1]
+                    self.consolidate()
+                    
+
+    def print(self):
+        pass
+        #if self.root:
+        #    self.root.print()
+        #else:
+        #    print('(empty)')
 
 
 def main():
