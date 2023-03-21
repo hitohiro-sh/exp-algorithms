@@ -41,9 +41,12 @@ class FibHeap:
         
         if not min_h or min_h.val > node.val:
             min_h = node
-        
 
     def pop(self) -> T:
+        pass
+
+
+    def consolidate(self) -> T:
         nodes = [None] * (len(self.root_list) + 1)
         for w in self.root_list:
             x = w
