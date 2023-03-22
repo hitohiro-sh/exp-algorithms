@@ -11,32 +11,40 @@ class Node(Generic[T]):
     val: T
     childs: List[Self] = field(default_factory=list)
     parent: Optional[Self] = None
-    degree: int = 0
+    #degree: int = 0
     mark: bool = False
+
+
+    @property
+    def degree(self):
+        return len(self.childs)
 
     def addChild(self, node : Self):
         self.childs.append(node)
         node.parent = self
-        self.degree += 1
+        #self.degree += 1
 
 
     def removeChild(self, node: Self):
         self.childs.remove(node)
         node.parent = None
-        self.degree -= 1
+        #self.degree -= 1
 
 
     def removeAllChild(self) -> List[Self]:
         childs = self.childs
-        self.childs = None
+        self.childs = []
         for c in childs:
             c.parent = None
         return childs
         
 
     def print(self, d=0, _p=print):
+
+
         ind = f"{d:>3} " + ' ' * d
         _p(f"{ind}{self.val}")
+        
         for c in self.childs:
             c.print(d+1, _p)
 
@@ -46,18 +54,13 @@ class FibHeap(Generic[T]):
     min_h: Node[T] = None
     root_list: List[Node[T]] = field(default_factory=list)
 
-    def _link(self, y: Node[T], x: Node[T]):
-        self.root_list.remove(y)
-        x.addChild(y)
-        y.mark = False
-
-
+    
     def add(self, v: T):
         node = Node(v)
         self.root_list.append(node)
         
-        if not min_h or min_h.val > node.val:
-            min_h = node
+        if not self.min_h or self.min_h.val > node.val:
+            self.min_h = node
 
 
     def pop(self) -> T:
@@ -75,9 +78,15 @@ class FibHeap(Generic[T]):
 
 
     def consolidate(self) -> T:
+        def link(x: Node[T], y: Node[T]):
+            #if y in self.root_list:
+            #    self.root_list.remove(y)
+            x.addChild(y)
+            y.mark = False
+
         nodes = [None] * (len(self.root_list) + 1)
-        for w in self.root_list:
-            x = w
+
+        for x in self.root_list:
             d = x.degree
             while nodes[d]:
                 y = nodes[d]
@@ -85,16 +94,17 @@ class FibHeap(Generic[T]):
                     tmp = x
                     x = y
                     y = tmp
-                self._link(y, x)
+                link(x, y)
                 nodes[d] = None
                 d += 1
-            nodes[d] = x
+            nodes[x.degree] = x
 
         self.min_h = None
+        self.root_list = []
         for i in range(len(nodes)):
             if nodes[i]:
                 self.root_list.append(nodes[i])
-                if not self.min_h or nodes[i].key < self.min_h.key:
+                if not self.min_h or nodes[i].val < self.min_h.val:
                     self.min_h = nodes[i]
     
     def decrease_key(self, x: Node[T], k: T):
@@ -144,6 +154,10 @@ class FibHeap(Generic[T]):
             
             
     def print(self):
+        print("---")
+        for i,root in enumerate(self.root_list):
+            print(f"root {i}:")
+            root.print()
         pass
         #if self.root:
         #    self.root.print()
