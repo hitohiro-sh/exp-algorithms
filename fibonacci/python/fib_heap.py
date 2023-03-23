@@ -38,8 +38,6 @@ class Node(Generic[T]):
         
 
     def print(self, d=0, _p=print):
-
-
         ind = f"{d:>3} " + ' ' * d
         _p(f"{ind}{self.val}")
         
@@ -105,8 +103,10 @@ class FibHeap(Generic[T]):
                 if not self.min_h or nodes[i].val < self.min_h.val:
                     self.min_h = nodes[i]
     
+
     def decrease_key(self, x: Node[T], k: T):
         self._decrease_key(x, k)
+
 
     def delete(self, x: Node[T]):
         self._decrease_key(x, None)
@@ -118,6 +118,7 @@ class FibHeap(Generic[T]):
             else:
                 self.min_h = self.root_list[-1]
                 self.consolidate()
+
 
     def _decrease_key(self, x: Node[T], k: Optional[T]):
         def cut(x: Node[T], y: Node[T]):
@@ -151,7 +152,7 @@ class FibHeap(Generic[T]):
                 self.cut(x, y)
                 self.cascading_cut(y)
             
-            
+
     def print(self):
         print("---")
         for i,root in enumerate(self.root_list):
@@ -190,8 +191,6 @@ def main():
     t.print()
     t.pop()
     t.print()
-
-
 
     pass
 
