@@ -11,7 +11,6 @@ class Node(Generic[T]):
     val: T
     childs: List[Self] = field(default_factory=list)
     parent: Optional[Self] = None
-    #degree: int = 0
     mark: bool = False
 
 
@@ -19,16 +18,15 @@ class Node(Generic[T]):
     def degree(self):
         return len(self.childs)
 
+
     def addChild(self, node : Self):
         self.childs.append(node)
         node.parent = self
-        #self.degree += 1
 
 
     def removeChild(self, node: Self):
         self.childs.remove(node)
         node.parent = None
-        #self.degree -= 1
 
 
     def removeAllChild(self) -> List[Self]:
@@ -135,6 +133,7 @@ class FibHeap(Generic[T]):
                 else:
                     cut(y, z)
                     cascading_cut(z)
+
         if k != None:
             if k > x.val:
                 raise Exception()
@@ -159,10 +158,6 @@ class FibHeap(Generic[T]):
             print(f"root {i}:")
             root.print()
         pass
-        #if self.root:
-        #    self.root.print()
-        #else:
-        #    print('(empty)')
 
 
 def main():
@@ -195,6 +190,8 @@ def main():
     t.print()
     t.pop()
     t.print()
+
+
 
     pass
 
