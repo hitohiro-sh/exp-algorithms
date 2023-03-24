@@ -6,7 +6,8 @@ def _log(msg):
     #print(f"LOG: {msg}")
     pass
 
-T = TypeVar('T', int, float, str)
+Ts = TypeVarTuple('Ts')
+T = TypeVar('T', int, float, str, Tuple[Self, *Ts])
 
 
 

@@ -2,7 +2,8 @@ from typing import *
 from dataclasses import dataclass
 from dataclasses import field
 
-T = TypeVar('T', int, float, str)
+Ts = TypeVarTuple('Ts')
+T = TypeVar('T', int, float, str, Tuple[Self, *Ts])
 
 @dataclass
 class Node(Generic[T]):

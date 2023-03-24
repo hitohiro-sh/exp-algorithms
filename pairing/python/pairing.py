@@ -2,7 +2,9 @@ from typing import *
 from dataclasses import dataclass
 from dataclasses import field
 
-T = TypeVar('T', int, float, str)
+Ts = TypeVarTuple('Ts')
+T = TypeVar('T', int, float, str, Tuple[Self, *Ts])
+
 
 @dataclass
 class Node(Generic[T]):
@@ -10,9 +12,11 @@ class Node(Generic[T]):
     childs: List[Self] = field(default_factory=list)
     parent: Optional[Self] = None
 
+
     def addChild(self, node : Self):
         self.childs.append(node)
         node.parent = self
+
 
     def print(self, d=0, _p=print):
         ind = f"{d:>3} " + ' ' * d
@@ -20,11 +24,12 @@ class Node(Generic[T]):
         for c in self.childs:
             c.print(d+1, _p)
 
+
 @dataclass
-class PairingHeap:
+class PairingHeap(Generic[T]):
     root: Node = None
 
-    def _meld(self, root: Node):
+    def _meld(self, root: Node[T]):
         if self.root.val < root.val:
             self.root.addChild(root)
         else:
