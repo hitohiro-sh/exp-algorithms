@@ -47,9 +47,10 @@ class PairingHeap(Generic[T]):
 
         if not self.root.childs:
             self.root = None
-        self.root = root.childs[0]
-        for c in root.childs[1:]:
-            self._meld(c)
+        else:
+            self.root = root.childs[0]
+            for c in root.childs[1:]:
+                self._meld(c)
 
         return val
     
