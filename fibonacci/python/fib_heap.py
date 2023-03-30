@@ -2,8 +2,7 @@ from typing import *
 from dataclasses import dataclass
 from dataclasses import field
 
-Ts = TypeVarTuple('Ts')
-T = TypeVar('T', int, float, str, Tuple[Self, *Ts])
+T = TypeVar('T', int, float, str, Tuple[Self, ...])
 
 
 
@@ -146,7 +145,7 @@ class FibHeap(Generic[T]):
                 self.cut(x, y)
                 self.cascading_cut(y)
             if x.val < self.min_h.val:
-                min_h.val = x
+                self.min_h.val = x
         else:
             y = x.parent
             if y:
