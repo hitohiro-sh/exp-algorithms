@@ -9,14 +9,15 @@ type ordered interface {
 	int
 }
 
-type Node[T ordered] struct {
+type Node[T any] struct {
 	Val    T
 	Childs []*Node[T]
 	Parent *Node[T]
 }
 
-type PairingHeap[T ordered] struct {
+type PairingHeap[T any] struct {
 	Root *Node[T]
+	Less func(x, y T) bool
 }
 
 type _P func(format string, args ...any) (n int, e error)
@@ -25,7 +26,18 @@ func p(format string, args ...any) {
 	// empty
 }
 
-func NewNode[T ordered](v T) *Node[T] {
+func DefaultLess[T ordered](x, y T) bool {
+	return x < y
+}
+
+func NewPairingHeap[T any](less func(x, y T) bool) *PairingHeap[T] {
+	return &PairingHeap[T]{
+		Root: nil,
+		Less: less,
+	}
+}
+
+func NewNode[T any](v T) *Node[T] {
 	return &Node[T]{
 		Val:    v,
 		Childs: []*Node[T]{},
@@ -55,8 +67,8 @@ func (self *Node[T]) Print(d int, _p _P) {
 // 	}
 // }
 
-func meld[T ordered](n1 *Node[T], n2 *Node[T]) *Node[T] {
-	if n1.Val < n2.Val {
+func (self *PairingHeap[T]) meld(n1 *Node[T], n2 *Node[T]) *Node[T] {
+	if self.Less(n1.Val, n2.Val) {
 		n1.AddChild(n2)
 		return n1
 	} else {
@@ -69,7 +81,7 @@ func (self *PairingHeap[T]) Add(v T) {
 	if self.Root == nil {
 		self.Root = NewNode(v)
 	} else {
-		self.Root = meld(self.Root, NewNode(v))
+		self.Root = self.meld(self.Root, NewNode(v))
 	}
 }
 
@@ -84,7 +96,7 @@ func (self *PairingHeap[T]) Pop() T {
 		for len(nodes) != 1 {
 			i := 1
 			for ; i < len(nodes); i += 2 {
-				tmp = append(tmp, meld(nodes[i-1], nodes[i]))
+				tmp = append(tmp, self.meld(nodes[i-1], nodes[i]))
 			}
 			if i == len(nodes) {
 				tmp = append(tmp, nodes[i-1])
@@ -111,14 +123,14 @@ func (self *PairingHeap[T]) Print() {
 func main() {
 	fmt.Println("Run.")
 
-	t := &PairingHeap[int]{}
+	t := &PairingHeap[int]{Less: DefaultLess[int]}
 	t.Add(10)
 	t.Print()
 	t.Add(20)
 	t.Print()
 
 	fmt.Println("---")
-	t = &PairingHeap[int]{}
+	t = &PairingHeap[int]{Less: DefaultLess[int]}
 	for i := 0; i < 10; i++ {
 		t.Add(10 * (i + 1))
 	}
